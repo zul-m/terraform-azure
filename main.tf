@@ -25,16 +25,19 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.0.0.0/16"]
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
+
+  depends_on = [azurerm_resource_group.rg]
 }
 
 resource "azurerm_subnet" "vm_subnet" {
   name                 = var.vm_subnet_name
   resource_group_name  = var.resource_group_name
-  virtual_network_name = var.resource_group_location
+  virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_network_interface" "vm_nic" {
+  count               = 1
   name                = "${var.vm_name}-nic"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
@@ -54,7 +57,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   admin_username      = var.vm_admin_username
   admin_password      = var.vm_admin_password
   network_interface_ids = [
-    azurerm_network_interface.vm_nic.id,
+    azurerm_network_interface.vm_nic[0].id,
   ]
 
   os_disk {
@@ -68,4 +71,74 @@ resource "azurerm_windows_virtual_machine" "vm" {
     sku       = "win10-21h2-pro-g2"
     version   = "latest"
   }
+}
+
+resource "azurerm_public_ip" "vm_public_ip" {
+  name                = "${var.vm_name}-ip"
+  resource_group_name = var.resource_group_name
+  location            = var.resource_group_location
+  allocation_method   = "Static"
+
+  depends_on = [azurerm_resource_group.rg]
+}
+
+resource "azurerm_network_security_group" "vm_nsg" {
+  name                = "${var.vm_name}-nsg"
+  location            = var.resource_group_location
+  resource_group_name = var.resource_group_name
+
+  depends_on = [azurerm_resource_group.rg]
+  
+  security_rule {
+    name                       = "RDP"
+    priority                   = 300
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3389"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "HTTP"
+    priority                   = 320
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "HTTPS"
+    priority                   = 340
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowHTTPOutBound"
+    priority                   = 300
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "vm_nsg_associate" {
+  subnet_id                 = azurerm_subnet.vm_subnet.id
+  network_security_group_id = azurerm_network_security_group.vm_nsg.id
 }
