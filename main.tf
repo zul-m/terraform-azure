@@ -21,16 +21,16 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = var.virtual_network
+  name                = "${var.resource_group_name}-vnet"
   address_space       = ["10.0.0.0/16"]
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 }
 
-resource "azurerm_subnet" "example" {
-  name                 = "internal"
-  resource_group_name  = azurerm_resource_group.example.name
-  virtual_network_name = azurerm_virtual_network.example.name
+resource "azurerm_subnet" "vm_subnet" {
+  name                 = var.vm_subnet_name
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = var.resource_group_location
   address_prefixes     = ["10.0.2.0/24"]
 }
 

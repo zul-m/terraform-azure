@@ -18,7 +18,7 @@ variable "resource_group_location" {
   description = "Choose location for your Resource Group"
 }
 
-variable "virtual_network" {
+variable "vm_subnet_name" {
   type        = string
-  description = "Create a name for your Virtual Network"
+  description = "Create a name for your VM subnet"
 }
