@@ -9,9 +9,13 @@ terraform {
 
 provider "azurerm" {
   features {}
+
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
+
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "mumu-tf"
-  location = "southeastasia"
+  name     = var.resource_group_name
+  location = var.resource_group_location
 }
