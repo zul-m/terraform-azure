@@ -34,38 +34,38 @@ resource "azurerm_subnet" "vm_subnet" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-resource "azurerm_network_interface" "example" {
-  name                = "example-nic"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+resource "azurerm_network_interface" "vm_nic" {
+  name                = "${var.vm_name}-nic"
+  location            = var.resource_group_location
+  resource_group_name = var.resource_group_name
 
   ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.example.id
+    name                          = var.ip_config_name
+    subnet_id                     = azurerm_subnet.vm_subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }
 
-resource "azurerm_windows_virtual_machine" "example" {
-  name                = "example-machine"
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
-  size                = "Standard_F2"
-  admin_username      = "adminuser"
-  admin_password      = "P@$$w0rd1234!"
+resource "azurerm_windows_virtual_machine" "vm" {
+  name                = var.vm_name
+  resource_group_name = var.resource_group_name
+  location            = var.resource_group_location
+  size                = var.vm_size
+  admin_username      = var.vm_admin_username
+  admin_password      = var.vm_admin_password
   network_interface_ids = [
-    azurerm_network_interface.example.id,
+    azurerm_network_interface.vm_nic.id,
   ]
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "Premium_LRS"
   }
 
   source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2016-Datacenter"
+    publisher = "MicrosoftWindowsDesktop"
+    offer     = "Windows-10"
+    sku       = "win10-21h2-pro-g2"
     version   = "latest"
   }
 }
