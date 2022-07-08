@@ -71,6 +71,10 @@ resource "azurerm_windows_virtual_machine" "vm" {
     sku       = "win10-21h2-pro-g2"
     version   = "latest"
   }
+  
+  boot_diagnostics {
+    storage_account_uri = ""
+  }
 }
 
 resource "azurerm_public_ip" "vm_public_ip" {
