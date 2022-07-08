@@ -26,7 +26,9 @@ resource "azurerm_virtual_network" "vnet" {
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 
-  depends_on = [azurerm_resource_group.rg]
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
 }
 
 resource "azurerm_subnet" "vm_subnet" {
@@ -37,7 +39,6 @@ resource "azurerm_subnet" "vm_subnet" {
 }
 
 resource "azurerm_network_interface" "vm_nic" {
-  count               = 1
   name                = "${var.vm_name}-nic"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
@@ -46,6 +47,7 @@ resource "azurerm_network_interface" "vm_nic" {
     name                          = var.ip_config_name
     subnet_id                     = azurerm_subnet.vm_subnet.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.vm_public_ip.id
   }
 }
 
@@ -57,7 +59,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   admin_username      = var.vm_admin_username
   admin_password      = var.vm_admin_password
   network_interface_ids = [
-    azurerm_network_interface.vm_nic[0].id,
+    azurerm_network_interface.vm_nic.id
   ]
 
   os_disk {
@@ -71,7 +73,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     sku       = "win10-21h2-pro-g2"
     version   = "latest"
   }
-  
+
   boot_diagnostics {
     storage_account_uri = ""
   }
@@ -83,7 +85,9 @@ resource "azurerm_public_ip" "vm_public_ip" {
   location            = var.resource_group_location
   allocation_method   = "Static"
 
-  depends_on = [azurerm_resource_group.rg]
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
 }
 
 resource "azurerm_network_security_group" "vm_nsg" {
@@ -91,8 +95,10 @@ resource "azurerm_network_security_group" "vm_nsg" {
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
 
-  depends_on = [azurerm_resource_group.rg]
-  
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
+
   security_rule {
     name                       = "RDP"
     priority                   = 300
