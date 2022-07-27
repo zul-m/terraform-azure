@@ -6,7 +6,7 @@
 
 ![azure provider](https://img.shields.io/badge/Azure-orange?logo=microsoft-azure&color=0089d6)
 
-## Prerequisite
+## Prerequisites
 
 1. Install Terraform and git (optional) on your local environment.
 2. Find your Azure subscription:
