@@ -26,7 +26,7 @@
 ## Steps
 
 1. Git clone this Repository.
-2. Add values into the terraform.tfvars file.
+2. Add values into the [terraform.tfvars](https://github.com/zul-m/terraform-azure/blob/main/terraform.tfvars) file.
 3. Choose subscription and connect to the Azure Account.
 4. Terraform init.
 5. Terraform apply.
